@@ -5,8 +5,10 @@ const config: CapacitorConfig = {
   appName: "Collector's Vault",
   webDir: 'www',
   server: {
-    // Load bundled assets offline; API calls use VITE_API_BASE_URL
-    androidScheme: 'https',
+    // Use http so the WebView can call the HTTP Express API without mixed-content blocks.
+    // Bundled assets still load offline from the APK.
+    androidScheme: 'http',
+    cleartext: true,
   },
   android: {
     allowMixedContent: true,

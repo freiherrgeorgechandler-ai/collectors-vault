@@ -6,6 +6,7 @@ import {
   registerAccount,
   logoutAccount,
 } from '../lib/serverAuth';
+import { getApiBase, isNativeApp } from '../utils/apiBase';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -58,7 +59,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       );
       setTimeout(() => onClose(), 900);
     } catch (err: any) {
-      setError(err.message || 'Authentication failed.');
+      const raw = String(err?.message || 'Authentication failed.');
+      if (/failed to fetch|networkerror|load failed/i.test(raw)) {
+        const target = getApiBase() || (typeof window !== 'undefined' ? window.location.origin : 'server');
+        setError(
+          isNativeApp()
+            ? `Cannot reach vault server at ${target}. Use Wi‑Fi/data that can open that address in Chrome, and keep the PC/server online.`
+            : `Cannot reach vault server (${target}). Is the server running?`
+        );
+      } else {
+        setError(raw);
+      }
     } finally {
       setLoading(false);
     }
