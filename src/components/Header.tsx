@@ -57,11 +57,11 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Brand & Logo */}
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-lg bg-amber-500 flex items-center justify-center text-zinc-950 font-extrabold shadow-md shadow-amber-500/20 text-lg">
-            A
+            M
           </div>
           <div>
             <h1 className="text-lg sm:text-xl font-semibold tracking-tight text-zinc-100 flex items-center gap-2">
-              Archivist
+              MyCollection
               <span className="text-zinc-500 font-normal text-sm">/ My Vault</span>
               <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-medium">
                 PRO

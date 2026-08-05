@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Collector\'s Vault</string>
-    <string name="title_activity_main">Collector\'s Vault</string>
+    <string name="app_name">MyCollection</string>
+    <string name="title_activity_main">MyCollection</string>
     <string name="package_name">com.collectorsvault.archivist</string>
     <string name="custom_url_scheme">com.collectorsvault.archivist</string>
 </resources>

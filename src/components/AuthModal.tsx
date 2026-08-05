@@ -167,7 +167,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center font-bold">
               <Shield className="w-4 h-4" />
             </div>
-            <h2 className="text-base font-semibold">Collector Vault Account</h2>
+            <h2 className="text-base font-semibold">MyCollection Account</h2>
           </div>
           <button
             onClick={onClose}
