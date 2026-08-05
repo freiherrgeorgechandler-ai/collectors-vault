@@ -13,6 +13,12 @@ const config: CapacitorConfig = {
   android: {
     allowMixedContent: true,
   },
+  plugins: {
+    // Native HTTP bypasses WebView CORS / cleartext fetch failures on Android.
+    CapacitorHttp: {
+      enabled: true,
+    },
+  },
 };
 
 export default config;

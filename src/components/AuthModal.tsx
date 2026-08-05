@@ -1,12 +1,19 @@
 import React, { useState } from 'react';
-import { X, LogIn, Lock, User as UserIcon, Loader2, CheckCircle2, Shield, AlertCircle, Cloud } from 'lucide-react';
+import { X, LogIn, Lock, User as UserIcon, Loader2, CheckCircle2, Shield, AlertCircle, Cloud, Server } from 'lucide-react';
 import {
   VaultUser,
   loginAccount,
   registerAccount,
   logoutAccount,
 } from '../lib/serverAuth';
-import { getApiBase, isNativeApp } from '../utils/apiBase';
+import {
+  getApiBase,
+  getDefaultApiBase,
+  getSavedApiBase,
+  isNativeApp,
+  setSavedApiBase,
+  testApiConnection,
+} from '../utils/apiBase';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -30,8 +37,27 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [serverUrl, setServerUrl] = useState(() => getSavedApiBase() || getDefaultApiBase() || getApiBase());
+  const [testing, setTesting] = useState(false);
+  const showServerField = isNativeApp();
 
   if (!isOpen) return null;
+
+  const persistServerUrl = () => {
+    if (!showServerField) return;
+    setSavedApiBase(serverUrl);
+  };
+
+  const handleTestServer = async () => {
+    setTesting(true);
+    setError(null);
+    setSuccessMsg(null);
+    persistServerUrl();
+    const result = await testApiConnection(serverUrl);
+    if (result.ok) setSuccessMsg(result.detail);
+    else setError(result.detail);
+    setTesting(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +72,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     setLoading(true);
     setError(null);
+    persistServerUrl();
     try {
       const user =
         mode === 'signup'
@@ -60,11 +87,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       setTimeout(() => onClose(), 900);
     } catch (err: any) {
       const raw = String(err?.message || 'Authentication failed.');
-      if (/failed to fetch|networkerror|load failed/i.test(raw)) {
+      if (/failed to fetch|networkerror|load failed|cannot reach/i.test(raw)) {
         const target = getApiBase() || (typeof window !== 'undefined' ? window.location.origin : 'server');
         setError(
           isNativeApp()
-            ? `Cannot reach vault server at ${target}. Use Wi‑Fi/data that can open that address in Chrome, and keep the PC/server online.`
+            ? `Cannot reach vault server at ${target}. On this phone open that URL in Chrome first. If Chrome also fails, the phone network is blocking port 3000.`
             : `Cannot reach vault server (${target}). Is the server running?`
         );
       } else {
@@ -190,6 +217,32 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-3">
+                {showServerField && (
+                  <div>
+                    <label className="block text-[11px] font-medium text-zinc-400 mb-1">
+                      Vault Server URL
+                    </label>
+                    <div className="relative">
+                      <Server className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                      <input
+                        type="url"
+                        value={serverUrl}
+                        onChange={(e) => setServerUrl(e.target.value)}
+                        placeholder="http://103.253.14.249:3000"
+                        className="w-full pl-9 pr-3 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-amber-500 font-mono"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => void handleTestServer()}
+                      disabled={testing || !serverUrl.trim()}
+                      className="mt-2 text-[11px] font-semibold text-amber-400 hover:text-amber-300 disabled:opacity-50"
+                    >
+                      {testing ? 'Testing…' : 'Test connection'}
+                    </button>
+                  </div>
+                )}
+
                 {mode === 'signup' && (
                   <div>
                     <label className="block text-[11px] font-medium text-zinc-400 mb-1">
