@@ -8,7 +8,5 @@ coverage/
 *.log
 .env*
 !.env.example
-data/
-
-# Android sources are tracked; build junk ignored in android/.gitignore
-# (needed for free GitHub Actions APK builds)
+# Server vault/user JSON only (not src/data)
+/data/
