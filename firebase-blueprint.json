@@ -1,0 +1,52 @@
+{
+  "entities": {
+    "Item": {
+      "title": "Item",
+      "description": "Collector item in the vault",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string" },
+        "categoryLabel": { "type": "string" },
+        "estimatedValue": { "type": "number" },
+        "currency": { "type": "string" },
+        "purchaseDate": { "type": "string" },
+        "purchasePrice": { "type": "number" },
+        "condition": { "type": "string" },
+        "photo": { "type": "string" },
+        "notes": { "type": "string" },
+        "attributes": { "type": "object" },
+        "tags": { "type": "array" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "userId", "title", "category"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile details",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "provider": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["uid"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile collection"
+    },
+    "/items/{itemId}": {
+      "schema": "Item",
+      "description": "User collection items"
+    }
+  }
+}

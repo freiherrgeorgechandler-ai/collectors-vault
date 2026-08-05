@@ -1,0 +1,11 @@
+{
+	"appId": "com.collectorsvault.archivist",
+	"appName": "Collector's Vault",
+	"webDir": "www",
+	"server": {
+		"androidScheme": "https"
+	},
+	"android": {
+		"allowMixedContent": true
+	}
+}

@@ -1,0 +1,14 @@
+node_modules/
+build/
+dist/
+www/
+ios/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+data/
+
+# Android sources are tracked; build junk ignored in android/.gitignore
+# (needed for free GitHub Actions APK builds)

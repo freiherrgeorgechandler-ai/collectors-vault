@@ -1,0 +1,10 @@
+{
+  "name": "Remix MYCollector\u0027s Vault V3",
+  "description": "Mobile app for recording and managing personal collections of Vinyl, Painting, CD, DVD, Blu-ray, Cassette, Chinese Tea, Wine, and Teapots with AI detail extraction and photo capture.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
