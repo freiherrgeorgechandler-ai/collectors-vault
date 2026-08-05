@@ -7,6 +7,7 @@ import dotenv from "dotenv";
 import {
   registerUser,
   loginUser,
+  changePassword,
   logoutSession,
   getUserFromToken,
   readVault,
@@ -94,6 +95,21 @@ app.get("/api/auth/me", (req, res) => {
   const user = getUserFromToken(bearerToken(req));
   if (!user) return res.status(401).json({ error: "Not signed in." });
   res.json({ user });
+});
+
+app.post("/api/auth/change-password", authMiddleware, (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body || {};
+    const vaultUser = (req as any).vaultUser;
+    const user = changePassword(
+      String(vaultUser.id),
+      String(currentPassword || ""),
+      String(newPassword || "")
+    );
+    res.json({ success: true, user });
+  } catch (err: any) {
+    res.status(400).json({ error: err.message || "Failed to change password." });
+  }
 });
 
 app.get("/api/vault/items", authMiddleware, (req, res) => {

@@ -5,6 +5,7 @@ import {
   loginAccount,
   registerAccount,
   logoutAccount,
+  changeAccountPassword,
 } from '../lib/serverAuth';
 import {
   getApiBase,
@@ -39,6 +40,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [serverUrl, setServerUrl] = useState(() => getSavedApiBase() || getDefaultApiBase() || getApiBase());
   const [testing, setTesting] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const showServerField = isNativeApp();
 
   if (!isOpen) return null;
@@ -107,10 +112,46 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     try {
       await logoutAccount();
       onAuthChange(null);
+      setShowChangePassword(false);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
       setSuccessMsg('Logged out. Your cloud copy stays on this server — sign in again anytime to recover it.');
       setTimeout(() => onClose(), 700);
     } catch (err: any) {
       setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentPassword || !newPassword) {
+      setError('Enter your current password and a new password.');
+      return;
+    }
+    if (newPassword.length < 6) {
+      setError('New password must be at least 6 characters.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError('New password and confirmation do not match.');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setSuccessMsg(null);
+    try {
+      await changeAccountPassword(currentPassword, newPassword);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setShowChangePassword(false);
+      setSuccessMsg('Password updated successfully.');
+    } catch (err: any) {
+      setError(err?.message || 'Failed to change password.');
     } finally {
       setLoading(false);
     }
@@ -139,6 +180,19 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         <div className="p-6 space-y-5">
           {currentUser ? (
             <div className="space-y-4 text-center py-3">
+              {error && (
+                <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-800/50 text-rose-300 text-xs flex items-center gap-2 text-left">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+              {successMsg && (
+                <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-800/50 text-emerald-300 text-xs flex items-center gap-2 text-left">
+                  <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                  <span>{successMsg}</span>
+                </div>
+              )}
+
               <div className="w-16 h-16 mx-auto rounded-full bg-gradient-to-tr from-amber-500 to-amber-300 p-0.5 shadow-lg shadow-amber-500/20">
                 <div className="w-full h-full rounded-full bg-zinc-900 flex items-center justify-center font-bold text-xl text-amber-400">
                   {accountLabel[0]?.toUpperCase() || 'U'}
@@ -162,16 +216,91 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 Sign in with the same username and password on another device to open it again.
               </p>
 
-              <div className="pt-2">
-                <button
-                  onClick={handleLogout}
-                  disabled={loading}
-                  className="w-full py-2.5 rounded-xl bg-zinc-800 hover:bg-rose-950/40 hover:text-rose-300 hover:border-rose-800/50 border border-zinc-700 text-xs font-semibold transition-all flex items-center justify-center gap-2"
-                >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogIn className="w-4 h-4 rotate-180" />}
-                  <span>Sign Out of Account</span>
-                </button>
-              </div>
+              {!showChangePassword ? (
+                <div className="pt-2 space-y-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowChangePassword(true);
+                      setError(null);
+                      setSuccessMsg(null);
+                    }}
+                    disabled={loading}
+                    className="w-full py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-xs font-semibold transition-all flex items-center justify-center gap-2"
+                  >
+                    <Lock className="w-4 h-4 text-amber-400" />
+                    <span>Change Password</span>
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    disabled={loading}
+                    className="w-full py-2.5 rounded-xl bg-zinc-800 hover:bg-rose-950/40 hover:text-rose-300 hover:border-rose-800/50 border border-zinc-700 text-xs font-semibold transition-all flex items-center justify-center gap-2"
+                  >
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogIn className="w-4 h-4 rotate-180" />}
+                    <span>Sign Out of Account</span>
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleChangePassword} className="pt-2 space-y-3 text-left">
+                  <div>
+                    <label className="block text-[11px] font-medium text-zinc-400 mb-1">Current Password</label>
+                    <input
+                      type="password"
+                      autoComplete="current-password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-zinc-200 focus:outline-none focus:border-amber-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-zinc-400 mb-1">New Password (Min 6 chars)</label>
+                    <input
+                      type="password"
+                      autoComplete="new-password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-zinc-200 focus:outline-none focus:border-amber-500"
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-zinc-400 mb-1">Confirm New Password</label>
+                    <input
+                      type="password"
+                      autoComplete="new-password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-xl text-xs text-zinc-200 focus:outline-none focus:border-amber-500"
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 text-xs font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
+                    <span>Save New Password</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowChangePassword(false);
+                      setCurrentPassword('');
+                      setNewPassword('');
+                      setConfirmPassword('');
+                      setError(null);
+                    }}
+                    disabled={loading}
+                    className="w-full py-2 rounded-xl text-[11px] font-semibold text-zinc-400 hover:text-zinc-200"
+                  >
+                    Cancel
+                  </button>
+                </form>
+              )}
             </div>
           ) : (
             <>

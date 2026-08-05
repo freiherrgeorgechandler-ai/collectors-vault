@@ -125,6 +125,35 @@ export function loginUser(usernameRaw: string, password: string) {
   return createSession(user);
 }
 
+export function changePassword(userId: string, currentPassword: string, newPassword: string) {
+  if (!currentPassword) throw new Error("Current password is required.");
+  if (!newPassword || newPassword.length < 6) {
+    throw new Error("New password must be at least 6 characters.");
+  }
+  if (currentPassword === newPassword) {
+    throw new Error("New password must be different from the current password.");
+  }
+
+  const users = loadUsers();
+  const idx = users.findIndex((u) => u.id === userId);
+  if (idx < 0) throw new Error("Account not found.");
+
+  const user = users[idx];
+  const currentHash = hashPassword(currentPassword, user.salt);
+  if (currentHash !== user.passwordHash) {
+    throw new Error("Current password is incorrect.");
+  }
+
+  const salt = crypto.randomBytes(16).toString("hex");
+  users[idx] = {
+    ...user,
+    salt,
+    passwordHash: hashPassword(newPassword, salt),
+  };
+  saveUsers(users);
+  return publicUser(users[idx]);
+}
+
 function createSession(user: VaultUserRecord) {
   const sessions = loadSessions();
   const token = crypto.randomBytes(32).toString("hex");

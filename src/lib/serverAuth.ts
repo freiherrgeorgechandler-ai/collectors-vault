@@ -95,6 +95,19 @@ export async function logoutAccount(): Promise<void> {
   }
 }
 
+export async function changeAccountPassword(
+  currentPassword: string,
+  newPassword: string
+): Promise<void> {
+  const res = await fetch(apiUrl('/api/auth/change-password'), {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Failed to change password.');
+}
+
 export async function fetchSessionUser(): Promise<VaultUser | null> {
   const token = getSavedToken();
   if (!token) return null;

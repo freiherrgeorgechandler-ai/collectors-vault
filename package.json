@@ -14,7 +14,10 @@
     "cap:sync": "npm run build:web && npx cap sync android",
     "cap:open": "npx cap open android",
     "mobile:prepare": "npm run cap:sync",
-    "apk:hint": "echo See PUBLISH.md — push to GitHub and download APK from Actions"
+    "apk:hint": "echo See PUBLISH.md — push to GitHub and download APK from Actions",
+    "vault:start": "pm2 start ecosystem.config.cjs",
+    "vault:stop": "pm2 stop collectors-vault",
+    "vault:status": "pm2 status"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.3",
@@ -38,6 +41,7 @@
     "@types/node": "^22.14.0",
     "autoprefixer": "^10.4.21",
     "esbuild": "^0.25.0",
+    "pm2": "^7.0.3",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
